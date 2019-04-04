@@ -75,6 +75,10 @@ private lateinit var gameViewModel :GameViewModel
             }
         })
 
+        gameViewModel.currentTime.observe(this, Observer { time ->
+            binding.timerText.text = time
+        })
+
         binding.correctButton.setOnClickListener {
             gameViewModel.onCorrect()
         }
