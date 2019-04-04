@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.example.android.guesstheword.R
@@ -49,24 +50,39 @@ private lateinit var gameViewModel :GameViewModel
                 container,
                 false
         )
-        // bind viewmodel with fragment
+        // bind view_model with fragment
         gameViewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
+
         Timber.i("get ViewModel")
 
+        // register an observer which will observe a word and once data
+        // is changed it will execute code in observer object
+        gameViewModel.word.observe(this, Observer { newWord ->
+            binding.wordText.text = newWord.toString()
+        })
 
+        gameViewModel.score.observe(this, Observer { newScore ->
+            binding.scoreText.text = newScore.toString()
+        })
+
+        gameViewModel.eventGameFinish.observe(this, Observer { hasFinished->
+            if(hasFinished) {
+                gameFinished()
+                // since live_data knows about fragment lifecycle, after every configuration changes
+                // since eventGameFinished is true the gameFinished method will be called
+                // that is why after event happened we need to change our flag to false
+                gameViewModel.onGameFinishComplete()
+            }
+        })
 
         binding.correctButton.setOnClickListener {
             gameViewModel.onCorrect()
-          updateScoreText()
-            updateWordText()
         }
+
         binding.skipButton.setOnClickListener {
             gameViewModel.onSkip()
-            updateScoreText()
-            updateWordText()
         }
-        updateScoreText()
-        updateWordText()
+
         return binding.root
 
     }
@@ -80,23 +96,11 @@ private lateinit var gameViewModel :GameViewModel
      * Called when the game is finished
      */
     private fun gameFinished() {
-        val action = GameFragmentDirections.actionGameToScore(gameViewModel.score)
+        // pass live_data and check for null
+        val action = GameFragmentDirections.actionGameToScore(gameViewModel.score.value ?:0)
         findNavController(this).navigate(action)
     }
 
-
-
-
-    /** Methods for updating the UI **/
-
-    private fun updateWordText() {
-        binding.wordText.text = gameViewModel.word
-
-    }
-
-    private fun updateScoreText() {
-        binding.scoreText.text = gameViewModel.score.toString()
-    }
 
 
 

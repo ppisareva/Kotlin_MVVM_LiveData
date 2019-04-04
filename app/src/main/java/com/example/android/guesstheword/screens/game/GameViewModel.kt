@@ -1,16 +1,26 @@
 package com.example.android.guesstheword.screens.game
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import timber.log.Timber
 
 class GameViewModel : ViewModel(){
 
-    // The current word
-     var word = ""
+    // Make word/score as a live data object
+    // encapsulate lave_data, it means that only ViewModel class can modify data, externally we can
+    // call only get method on data
+    private val _word = MutableLiveData<String>()
+    val word: LiveData<String>
+        get() = _word
 
-    // The current score
-     var score = 0
-
+    private val _score = MutableLiveData<Int>()
+    val score: LiveData<Int>
+        get() = _score
+    // register an event that shows that the game is finished
+    private val _eventGameFinish = MutableLiveData<Boolean>()
+    val eventGameFinish: LiveData<Boolean>
+             get() = _eventGameFinish
 
     // The list of words - the front of the list is the next word to guess
     private lateinit var wordList: MutableList<String>
@@ -18,6 +28,9 @@ class GameViewModel : ViewModel(){
     init{
 
         Timber.i("created VieModel")
+        // since liveData object is null at the beginning we need to initialize it via getValue method
+        _score.value = 0;
+        _eventGameFinish.value = false
         resetList()
         nextWord()
     }
@@ -56,25 +69,35 @@ class GameViewModel : ViewModel(){
     private fun nextWord() {
         //Select and remove a word from the list
         if (wordList.isEmpty()) {
-           // gameFinished()
+           _eventGameFinish.value = true
         } else {
-            word = wordList.removeAt(0)
+            // initialize word
+            _word.value= wordList.removeAt(0)
         }
 
     }
 
      fun onSkip() {
-        score--
+         // update score object, we need to check it for nullable, since livedata is a nullable object
+        _score.value = (score.value)?.minus(1)
         nextWord()
     }
 
      fun onCorrect() {
-        score++
+         // update score object, we need to check it for nullable, since livedata is a nullable object
+         _score.value = (score.value)?.plus(1)
         nextWord()
     }
     override fun onCleared() {
         super.onCleared()
         Timber.i("destroyed ViewModel")
     }
+
+
+    fun onGameFinishComplete(){
+        _eventGameFinish.value = false
+    }
+
+
 }
 
