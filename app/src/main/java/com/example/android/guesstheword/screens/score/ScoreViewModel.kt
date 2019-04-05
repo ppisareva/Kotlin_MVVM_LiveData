@@ -4,28 +4,25 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class ScoreViewModel(fimalScore: Int): ViewModel() {
+class ScoreViewModel(finalScore: Int) : ViewModel() {
+
+    private val _eventPlayAgain = MutableLiveData<Boolean>()
+    val eventPlayAgain: LiveData<Boolean>
+        get() = _eventPlayAgain
 
     private val _score = MutableLiveData<Int>()
     val score: LiveData<Int>
         get() = _score
 
-    // register an event that shows that the game is finished
-    private val _eventPlayEgain = MutableLiveData<Boolean>()
-    val eventPlayEgain: LiveData<Boolean>
-        get() = _eventPlayEgain
-
     init {
-       _score.value = fimalScore
-        _eventPlayEgain.value = false;
+        _score.value = finalScore
     }
 
-     fun onPlayAgain() {
-        _eventPlayEgain.value = true
-
+    fun onPlayAgain() {
+        _eventPlayAgain.value = true
     }
 
-    fun onPlayEgainComplete() {
-        _eventPlayEgain.value = false
+    fun onPlayAgainComplete() {
+        _eventPlayAgain.value = false
     }
 }
