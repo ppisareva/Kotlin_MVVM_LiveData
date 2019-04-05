@@ -17,6 +17,7 @@
 package com.example.android.guesstheword.screens.game
 
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -76,7 +77,7 @@ private lateinit var gameViewModel :GameViewModel
         })
 
         gameViewModel.currentTime.observe(this, Observer { time ->
-            binding.timerText.text = time
+            binding.timerText.text = DateUtils.formatElapsedTime(time)
         })
 
         binding.correctButton.setOnClickListener {
@@ -101,7 +102,9 @@ private lateinit var gameViewModel :GameViewModel
      */
     private fun gameFinished() {
         // pass live_data and check for null
-        val action = GameFragmentDirections.actionGameToScore(gameViewModel.score.value ?:0)
+        Timber.i("+________________start navigation")
+        val currentScore = gameViewModel.score.value ?: 0
+        val action = GameFragmentDirections.actionGameToScore(currentScore)
         findNavController(this).navigate(action)
     }
 
